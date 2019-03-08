@@ -47,7 +47,7 @@ namespace ADScript
                 }
             }
 
-            if (!Active.spheres.Find(s => s.transform.position == position))
+            if (!Active.spheres.Find(s => s.transform.position == position && s.transform.localScale.x == radius))
             {
                 MeshRenderer sphere = Instantiate(Active.sphere, position, new Quaternion());
                 sphere.sharedMaterial = new Material(sphere.sharedMaterial);

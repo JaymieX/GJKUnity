@@ -43,10 +43,12 @@ public class UIController : MonoBehaviour
     public void SetValueA()
     {
         SetGameObjectValues(ref ObjectA);
+        SimulationManager.RenewState();
     }
 
     public void SetValueB()
     {
         SetGameObjectValues(ref ObjectB);
+        SimulationManager.RenewState();
     }
 }

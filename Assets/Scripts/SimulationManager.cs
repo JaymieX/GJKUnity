@@ -9,7 +9,7 @@ public class SimulationManager : MonoBehaviour
     private List<Vector3> _minkowskisumPoints;
     private List<Vector3> _gjkSupportPoints;
 
-    private GJKState _state;
+    private static GJKState _state;
 
     // Start is called before the first frame update
     private void Awake()
@@ -21,13 +21,13 @@ public class SimulationManager : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            _state = new GJKState(ref PolytopeA, ref PolytopeB);
-        }
-
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            if (_state == null)
+            {
+                _state = new GJKState(ref PolytopeA, ref PolytopeB);
+            }
+
             _minkowskisumPoints.Clear();
             _minkowskisumPoints = MinkowskiSum.CalcMinkowskiSum(PolytopeA, PolytopeB);
 
@@ -41,6 +41,10 @@ public class SimulationManager : MonoBehaviour
                 {
                     _gjkSupportPoints.Add(_state.CurrentSimplex.PeekAt(i));
                 }
+            }
+            else
+            {
+                _state = null;
             }
         }
     }
@@ -61,13 +65,13 @@ public class SimulationManager : MonoBehaviour
             }
         }
 
-        Gizmos.color = Color.green;
+        ADScript.Gizmos.color = Color.green;
 
         if (_gjkSupportPoints != null)
         {
             foreach (Vector3 vertex in _gjkSupportPoints)
             {
-                Gizmos.DrawSphere(vertex, 0.15f);
+                ADScript.Gizmos.DrawSphere(vertex, 0.15f);
             }
 
             ADScript.Gizmos.color = Color.blue;
@@ -81,5 +85,10 @@ public class SimulationManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    public static void RenewState()
+    {
+        _state = null;
     }
 }

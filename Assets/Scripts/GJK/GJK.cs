@@ -71,6 +71,7 @@ public class GJK
             }
 
             // Get new direction
+            // #TODO: fix
             Vector3 newDirection = Vector3.Cross(pointC, Vector3.Cross(trigNormal, directionCToO));
             if (newDirection.IsInOppositeDirection(trigNormal))
             {
