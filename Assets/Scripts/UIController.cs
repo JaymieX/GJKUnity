@@ -7,6 +7,7 @@ public class UIController : MonoBehaviour
 {
     public InputField TX, TY, TZ;
     public InputField RX, RY, RZ;
+    public InputField IX, IY, IZ;
 
     public GameObject ObjectA, ObjectB;
 
@@ -50,5 +51,12 @@ public class UIController : MonoBehaviour
     {
         SetGameObjectValues(ref ObjectB);
         SimulationManager.RenewState();
+    }
+
+    public void FixedUpdate()
+    {
+        SimulationManager.initDirection.x = GetTextValue(IX, 0f);
+        SimulationManager.initDirection.y = GetTextValue(IY, 0f);
+        SimulationManager.initDirection.z = GetTextValue(IZ, 0f);
     }
 }

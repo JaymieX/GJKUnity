@@ -11,6 +11,8 @@ public class SimulationManager : MonoBehaviour
 
     private static GJKState _state;
 
+    public static Vector3 initDirection;
+
     // Start is called before the first frame update
     private void Awake()
     {
@@ -26,6 +28,7 @@ public class SimulationManager : MonoBehaviour
             if (_state == null)
             {
                 _state = new GJKState(ref PolytopeA, ref PolytopeB);
+                _state.LastDirection = initDirection;
             }
 
             _minkowskisumPoints.Clear();
@@ -84,6 +87,12 @@ public class SimulationManager : MonoBehaviour
                     Debug.Log("Draw line " + i + " " + j);
                 }
             }
+        }
+
+        if (_state != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(Vector3.zero, _state.LastDirection);
         }
     }
 

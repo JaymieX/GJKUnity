@@ -7,8 +7,8 @@ public class GJK
     private static Vector3 SupportFunction(Vector3 direction, Polytope polytopeA, Polytope polytopeB)
     {
         Vector3 tempPointA = polytopeA.GetFurthestPoint(direction);
-        Vector3 tempPointB = -(polytopeB.GetFurthestPoint(-direction));
-        return tempPointA + tempPointB;
+        Vector3 tempPointB = polytopeB.GetFurthestPoint(-direction);
+        return tempPointA + -tempPointB;
     }
 
     private static void ProcessSimplex(ref GJKState state)
@@ -50,37 +50,28 @@ public class GJK
             Vector3 pointB = state.CurrentSimplex.PeekAt(1);
             Vector3 pointC = state.CurrentSimplex.PeekAt(2); // Newest
 
-            Vector3 trigNormal = Vector3.Cross(pointB - pointC, pointA - pointC);
+            Vector3 trigNormal = Vector3.Cross(pointA - pointC, pointB - pointC);
 
             // Get C to origin
             Vector3 directionCToO = new Vector3(0f, 0f, 0f) - pointC;
+
+            // Get new direction
+            Vector3 newDirection;
 
             // Check if we got the right direction for normal
             if (trigNormal.IsInOppositeDirection(directionCToO))
             {
                 // Negate normal
-                trigNormal = -trigNormal;
-
-                // Still not facing
-                if (trigNormal.IsInOppositeDirection(directionCToO))
-                {
-                    // Get rid of oldest point
-                    state.CurrentSimplex.PopFront();
-                    return;
-                }
+                //newDirection = Vector3.Cross(Vector3.Cross(-trigNormal, directionCToO), -trigNormal);
+                newDirection = -trigNormal;
             }
-
-            // Get new direction
-            // #TODO: fix
-            Vector3 newDirection = Vector3.Cross(pointC, Vector3.Cross(trigNormal, directionCToO));
-            if (newDirection.IsInOppositeDirection(trigNormal))
+            else
             {
-                // Not facing trigNormal that is already roughly facing origin
-                // Thus flip it
-                newDirection = -newDirection;
+                //newDirection = Vector3.Cross(Vector3.Cross(trigNormal, directionCToO), trigNormal);
+                newDirection = trigNormal;
             }
 
-            state.LastDirection = newDirection;
+            state.LastDirection = newDirection.normalized;
 
             // Add 4th point
             state.CurrentSimplex.Push(SupportFunction(state.LastDirection, state.GetPolytopeA, state.GetPolytopeB));
@@ -88,6 +79,7 @@ public class GJK
         // Tetrahedron
         else
         {
+            // Next assignment
             state.FinishRun = true;
         }
     }
@@ -112,8 +104,11 @@ public class GJK
                 state.CurrentSimplex.Push(SupportFunction(polytopeB.GetCentre() - polytopeA.GetCentre(), polytopeA, polytopeB));
 
                 // Get a search direction from first point to origin
-                Vector3 directionAToO = new Vector3(0f, 0f, 0f) - state.CurrentSimplex.PeekBack();
-                state.LastDirection = directionAToO;
+                if (state.LastDirection == Vector3.zero)
+                {
+                    Vector3 directionAToO = new Vector3(0f, 0f, 0f) - state.CurrentSimplex.PeekBack();
+                    state.LastDirection = directionAToO;
+                }
             }
             // Second GJK run
             else if (state.CurrentSimplex.GetSize() == 1)
