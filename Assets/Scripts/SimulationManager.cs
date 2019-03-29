@@ -84,7 +84,7 @@ public class SimulationManager : MonoBehaviour
                 for (int j = i + 1; j < count; j++)
                 {
                     ADScript.Gizmos.DrawLine(_gjkSupportPoints[i], _gjkSupportPoints[j]);
-                    Debug.Log("Draw line " + i + " " + j);
+                    // Debug.Log("Draw line " + i + " " + j);
                 }
             }
         }
@@ -93,6 +93,15 @@ public class SimulationManager : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawLine(Vector3.zero, _state.LastDirection);
+
+            if (_state.MiscDebugLines.Count != 0)
+            {
+                Gizmos.color = Color.green;
+                for (int i = 0; i < _state.MiscDebugLines.Count; i++)
+                {
+                    Gizmos.DrawLine(Vector3.zero, _state.MiscDebugLines[i]);
+                }
+            }
         }
     }
 

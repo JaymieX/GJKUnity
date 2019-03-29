@@ -48,6 +48,11 @@ public class Simplex
         return _vertices.ElementAt(index);
     }
 
+    public void RemoveAt(int index)
+    {
+        _vertices.Remove(PeekAt(index));
+    }
+
     public int GetSize()
     {
         return _vertices.Count;
@@ -85,6 +90,8 @@ public class GJKState
 
     public Vector3 LastDirection { get; set; }
 
+    public List<Vector3> MiscDebugLines { get; set; }
+
     public Simplex CurrentSimplex { get; set; }
 
     private Polytope _polytopeA, _polytopeB;
@@ -112,5 +119,7 @@ public class GJKState
         _polytopeB = polytopeB;
 
         CurrentSimplex = new Simplex();
+
+        MiscDebugLines = new List<Vector3>();
     }
 }

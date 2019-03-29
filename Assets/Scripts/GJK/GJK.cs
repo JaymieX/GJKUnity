@@ -45,6 +45,9 @@ public class GJK
         // Triangle
         else if (state.CurrentSimplex.GetSize() == 3)
         {
+            // Clear lines
+            state.MiscDebugLines.Clear();
+
             // Get the triangle's normal
             Vector3 pointA = state.CurrentSimplex.PeekAt(0); // Oldest
             Vector3 pointB = state.CurrentSimplex.PeekAt(1);
@@ -75,12 +78,68 @@ public class GJK
 
             // Add 4th point
             state.CurrentSimplex.Push(SupportFunction(state.LastDirection, state.GetPolytopeA, state.GetPolytopeB));
+
+            // Debug info
+            Vector3 pointD = state.CurrentSimplex.PeekAt(3); // Newest
+
+            Vector3 vecDC = pointC - pointD;
+            Vector3 vecDB = pointB - pointD;
+            Vector3 vecDA = pointA - pointD;
+
+            Vector3 normDCB = Vector3.Cross(vecDC, vecDB);
+            Vector3 normDCA = Vector3.Cross(vecDC, vecDA);
+            Vector3 normDBA = Vector3.Cross(vecDA, vecDB);
+
+            state.MiscDebugLines.Add(normDCB);
+            state.MiscDebugLines.Add(normDCA);
+            state.MiscDebugLines.Add(normDBA);
         }
         // Tetrahedron
         else
         {
-            // Next assignment
-            state.FinishRun = true;
+            // Clear lines
+            state.MiscDebugLines.Clear();
+
+            Vector3 pointA = state.CurrentSimplex.PeekAt(0); // Oldest
+            Vector3 pointB = state.CurrentSimplex.PeekAt(1);
+            Vector3 pointC = state.CurrentSimplex.PeekAt(2);
+            Vector3 pointD = state.CurrentSimplex.PeekAt(3); // Newest
+
+            Vector3 vecDC = pointC - pointD;
+            Vector3 vecDB = pointB - pointD;
+            Vector3 vecDA = pointA - pointD;
+
+            Vector3 normDCB = Vector3.Cross(vecDC, vecDB);
+            Vector3 normDCA = Vector3.Cross(vecDC, vecDA);
+            Vector3 normDBA = Vector3.Cross(vecDA, vecDB);
+
+            Vector3 directionDtoO = new Vector3(0f, 0f, 0f) - pointD;
+
+            if (normDCB.IsInSameDirection(Vector3.zero))
+            {
+                // Remove oldest(A aka index 0)
+                state.CurrentSimplex.RemoveAt(0);
+                state.LastDirection = normDCB;
+            }
+            else if (normDCA.IsInSameDirection(Vector3.zero))
+            {
+                // Remove second oldest(B aka index 1)
+                state.CurrentSimplex.RemoveAt(1);
+                state.LastDirection = normDCA;
+            }
+            else if (normDBA.IsInSameDirection(Vector3.zero))
+            {
+                // Remove third oldest(C aka index 2)
+                state.CurrentSimplex.RemoveAt(2);
+                state.LastDirection = normDBA;
+            }
+            else
+            {
+                Debug.Log("Finished a GJK IT");
+
+                // Origin inside
+                state.FinishRun = true;
+            }
         }
     }
 
