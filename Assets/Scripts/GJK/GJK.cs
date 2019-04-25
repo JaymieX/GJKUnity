@@ -11,6 +11,33 @@ public class GJK
         return tempPointA + -tempPointB;
     }
 
+    private static Edge FindClosestEdge(Vector3 origin, ref GJKState state)
+    {
+        List<Edge> edges = new List<Edge>();
+
+
+        for (int i = 0; i < state.CurrentSimplex.GetSize(); i++)
+        {
+            Vector3 a = state.CurrentSimplex.PeekAt(i);
+            Vector3 b;
+
+            if (i + 1 != state.CurrentSimplex.GetSize())
+            {
+                b = state.CurrentSimplex.PeekAt(i + 1);
+            }
+            else
+            {
+                b = state.CurrentSimplex.PeekAt(0);
+            }
+
+            edges.Add(new Edge(a, b, origin, i));
+        }
+
+        edges.Sort();
+
+        return edges[0];
+    }
+
     private static void ProcessSimplex(ref GJKState state)
     {
         // Line
@@ -140,6 +167,8 @@ public class GJK
             {
                 state.FinishRun = true;
                 Debug.Log("Collided.");
+
+                EPA(ref state);
             }
             // Drop point 0
             else if (Mathf.Sign(det0) != Mathf.Sign(det1))
@@ -160,6 +189,31 @@ public class GJK
             else if (Mathf.Sign(det0) != Mathf.Sign(det4))
             {
                 state.CurrentSimplex.RemoveAt(3);
+            }
+        }
+    }
+
+    private static EPAData EPA(ref GJKState state)
+    {
+        Vector3 origin = Vector3.zero - state.CurrentSimplex.PeekBack();
+        
+        while(true)
+        {
+            Edge e = FindClosestEdge(origin, ref state);
+            Vector3 supportP = SupportFunction(e.EdgeNormal, state.GetPolytopeA, state.GetPolytopeB);
+
+            float d = Vector3.Dot(supportP, e.EdgeNormal);
+            if (d - e.Distance < 0.000001)
+            {
+                EPAData data = new EPAData();
+                data.Normal = e.EdgeNormal;
+                data.Depth = d;
+
+                return data;
+            }
+            else
+            {
+                state.CurrentSimplex.Insert(e.PointA, supportP);
             }
         }
     }

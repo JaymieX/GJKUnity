@@ -57,6 +57,11 @@ public class Simplex
     {
         return _vertices.Count;
     }
+
+    public void Insert(Vector3 value, Vector3 vertex)
+    {
+        _vertices.AddAfter(_vertices.Find(value), vertex);
+    }
 }
 
 public class GJKState
