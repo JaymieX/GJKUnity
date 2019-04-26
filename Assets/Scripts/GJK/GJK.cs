@@ -168,7 +168,7 @@ public class GJK
                 state.FinishRun = true;
                 Debug.Log("Collided.");
 
-                EPA(ref state);
+                state.epaData = EPA(ref state);
             }
             // Drop point 0
             else if (Mathf.Sign(det0) != Mathf.Sign(det1))

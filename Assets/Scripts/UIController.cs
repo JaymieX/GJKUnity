@@ -5,9 +5,13 @@ using UnityEngine.UI;
 
 public class UIController : MonoBehaviour
 {
+    public static Vector3 initVelocutyA, initVelocutyB;
+
     public InputField TX, TY, TZ;
     public InputField RX, RY, RZ;
     public InputField IX, IY, IZ;
+
+    public InputField IX_V, IY_V, IZ_V;
 
     public GameObject ObjectA, ObjectB;
 
@@ -43,12 +47,20 @@ public class UIController : MonoBehaviour
 
     public void SetValueA()
     {
+        initVelocutyA.x = GetTextValue(IX_V, 0f);
+        initVelocutyA.y = GetTextValue(IY_V, 0f);
+        initVelocutyA.z = GetTextValue(IZ_V, 0f);
+
         SetGameObjectValues(ref ObjectA);
         SimulationManager.RenewState();
     }
 
     public void SetValueB()
     {
+        initVelocutyB.x = GetTextValue(IX_V, 0f);
+        initVelocutyB.y = GetTextValue(IY_V, 0f);
+        initVelocutyB.z = GetTextValue(IZ_V, 0f);
+
         SetGameObjectValues(ref ObjectB);
         SimulationManager.RenewState();
     }

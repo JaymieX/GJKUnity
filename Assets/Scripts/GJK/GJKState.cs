@@ -66,6 +66,8 @@ public class Simplex
 
 public class GJKState
 {
+    public EPAData epaData;
+
     /**
      * \property    public bool IsCollided
      *

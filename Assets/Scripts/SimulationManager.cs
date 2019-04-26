@@ -47,9 +47,66 @@ public class SimulationManager : MonoBehaviour
             }
             else
             {
+                // Physics res
+                float c = 0.5f;
+
+                PhysicsSim compA = _state.GetPolytopeA.GetComponent<PhysicsSim>();
+                PhysicsSim compB = _state.GetPolytopeB.GetComponent<PhysicsSim>();
+
+                compA.velocity = UIController.initVelocutyA;
+                compB.velocity = UIController.initVelocutyB;
+
+                float massTotal = compA.mass + compB.mass;
+
+                Vector3 newVelocityA =
+                    (c * compB.mass) * (compB.velocity - compA.velocity) +
+                    (compA.mass * compA.velocity) +
+                    (compB.mass * compB.velocity);
+                newVelocityA.x /= massTotal;
+                newVelocityA.y /= massTotal;
+                newVelocityA.z /= massTotal;
+
+                Vector3 newVelocityB =
+                    (c * compA.mass) * (compA.velocity - compB.velocity) +
+                    (compA.mass * compA.velocity) +
+                    (compB.mass * compB.velocity);
+                newVelocityB.x /= massTotal;
+                newVelocityB.y /= massTotal;
+                newVelocityB.z /= massTotal;
+
+                compA.velocity = newVelocityA;
+                compB.velocity = newVelocityB;
+
+                // Angular
+                float vr = Vector3.Dot(_state.epaData.Normal, (compA.velocity - compB.velocity));
+
+                // Contacts
+                Vector3 cpA = compA.transform.position + (_state.epaData.Normal * _state.epaData.Depth);
+                Vector3 cpB = compB.transform.position + (-_state.epaData.Normal * _state.epaData.Depth);
+
+                float j =
+            -vr * (c + 1f) /
+            (1f / compA.mass + 1f / compB.mass) +
+            HelpFunction(_state.epaData.Normal, 300, cpA) +
+            HelpFunction(_state.epaData.Normal, 500, cpB);
+
+                Vector3 jn = _state.epaData.Normal * j;
+
+                compA.AngularVelocity = compA.velocity + (Vector3.Cross(cpA, jn) / 300);
+                compB.AngularVelocity = compB.velocity + (Vector3.Cross(cpB, -jn) / 500);
+
                 _state = null;
             }
         }
+    }
+
+    private float HelpFunction(Vector3 normal, float i, Vector3 r)
+    {
+        return Vector3.Dot
+            (
+            normal,
+            Vector3.Cross((Vector3.Cross(r, normal) / i), r)
+            );
     }
 
     private void OnDrawGizmos()
