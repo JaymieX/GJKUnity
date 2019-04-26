@@ -87,13 +87,13 @@ public class SimulationManager : MonoBehaviour
                 float j =
             -vr * (c + 1f) /
             (1f / compA.mass + 1f / compB.mass) +
-            HelpFunction(_state.epaData.Normal, 300, cpA) +
-            HelpFunction(_state.epaData.Normal, 500, cpB);
+            HelpFunction(_state.epaData.Normal, 0.16f, cpA) +
+            HelpFunction(_state.epaData.Normal, 0.16f, cpB);
 
                 Vector3 jn = _state.epaData.Normal * j;
 
-                compA.AngularVelocity = compA.velocity + (Vector3.Cross(cpA, jn) / 300);
-                compB.AngularVelocity = compB.velocity + (Vector3.Cross(cpB, -jn) / 500);
+                compA.AngularVelocity = compA.velocity + (Vector3.Cross(cpA, jn) / 0.16f);
+                compB.AngularVelocity = compB.velocity + (Vector3.Cross(cpB, -jn) / 0.16f);
 
                 _state = null;
             }
