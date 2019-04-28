@@ -58,42 +58,57 @@ public class SimulationManager : MonoBehaviour
 
                 float massTotal = compA.mass + compB.mass;
 
-                Vector3 newVelocityA =
-                    (c * compB.mass) * (compB.velocity - compA.velocity) +
-                    (compA.mass * compA.velocity) +
-                    (compB.mass * compB.velocity);
-                newVelocityA.x /= massTotal;
-                newVelocityA.y /= massTotal;
-                newVelocityA.z /= massTotal;
-
-                Vector3 newVelocityB =
-                    (c * compA.mass) * (compA.velocity - compB.velocity) +
-                    (compA.mass * compA.velocity) +
-                    (compB.mass * compB.velocity);
-                newVelocityB.x /= massTotal;
-                newVelocityB.y /= massTotal;
-                newVelocityB.z /= massTotal;
-
-                compA.velocity = newVelocityA;
-                compB.velocity = newVelocityB;
-
-                // Angular
-                float vr = Vector3.Dot(_state.epaData.Normal, (compA.velocity - compB.velocity));
-
                 // Contacts
-                Vector3 cpA = compA.transform.position + (_state.epaData.Normal * _state.epaData.Depth);
-                Vector3 cpB = compB.transform.position + (-_state.epaData.Normal * _state.epaData.Depth);
+                Vector3 lpA = _state.CurrentSimplex.PopBack();
+                Vector3 lpB = _state.CurrentSimplex.PopBack();
+
+                Vector3 cpA = Vector3.Lerp(lpA, lpB, 0.5f);
+                Vector3 cpB = cpA;
+
+                // Inert
+                float invVal = 1f / 0.16f;
+
+                Matrix4x4 rotInert = Matrix4x4.identity;
+                rotInert.SetRow(0, new Vector4(invVal, 0f, 0f, 0f));
+                rotInert.SetRow(1, new Vector4(0f, invVal, 0f, 0f));
+                rotInert.SetRow(2, new Vector4(0f, 0f, 0f, invVal));
 
                 float j =
-            -vr * (c + 1f) /
-            (1f / compA.mass + 1f / compB.mass) +
-            HelpFunction(_state.epaData.Normal, 0.16f, cpA) +
-            HelpFunction(_state.epaData.Normal, 0.16f, cpB);
+                    (-(1f + c) * Vector3.Dot(compA.velocity - compB.velocity, _state.epaData.Normal)) /
+                    ((1f / compA.mass + 1f / compB.mass) +
+                    Vector3.Dot(
+                        Vector3.Cross(rotInert * Vector3.Cross(cpA, _state.epaData.Normal), cpA) +
+                        Vector3.Cross(rotInert * Vector3.Cross(cpB, _state.epaData.Normal), cpB),
+                        _state.epaData.Normal
+                        ));
 
-                Vector3 jn = _state.epaData.Normal * j;
+                Vector4 wa = rotInert *
+                    (
+                    Vector3.Cross(
+                        cpA,
+                        j * _state.epaData.Normal
+                        )
+                    );
 
-                compA.AngularVelocity = compA.velocity + (Vector3.Cross(cpA, jn) / 0.16f);
-                compB.AngularVelocity = compB.velocity + (Vector3.Cross(cpB, -jn) / 0.16f);
+                compA.AngularVelocity.x += wa.x;
+                compA.AngularVelocity.y += wa.y;
+                compA.AngularVelocity.z += wa.z;
+
+                Vector4 wb = rotInert *
+                    (
+                    Vector3.Cross(
+                        cpB,
+                        j * _state.epaData.Normal
+                        )
+                    );
+
+                compB.AngularVelocity.x -= wb.x;
+                compB.AngularVelocity.y -= wb.y;
+                compB.AngularVelocity.z -= wb.z;
+
+                compA.velocity += ((j / compA.mass) * _state.epaData.Normal);
+
+                compB.velocity += ((j / compB.mass) * -_state.epaData.Normal);
 
                 _state = null;
             }

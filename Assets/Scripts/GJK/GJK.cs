@@ -196,14 +196,14 @@ public class GJK
     private static EPAData EPA(ref GJKState state)
     {
         Vector3 origin = Vector3.zero - state.CurrentSimplex.PeekBack();
-        
-        while(true)
+
+        while (true)
         {
             Edge e = FindClosestEdge(origin, ref state);
             Vector3 supportP = SupportFunction(e.EdgeNormal, state.GetPolytopeA, state.GetPolytopeB);
 
             float d = Vector3.Dot(supportP, e.EdgeNormal);
-            if (d - e.Distance < 0.000001)
+            if (d - e.Distance < 0.0001f)
             {
                 EPAData data = new EPAData();
                 data.Normal = e.EdgeNormal;

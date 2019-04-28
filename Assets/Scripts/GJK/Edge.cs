@@ -28,7 +28,7 @@ public class Edge : IComparable
         EdgeNormal = EdgeNormal.normalized;
 
         // Distance
-        Distance = Vector3.Project(origin, EdgeNormal).magnitude;
+        Distance = Vector3.Dot(origin, EdgeNormal);
     }
 
     public int CompareTo(object obj)

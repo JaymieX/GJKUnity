@@ -20,6 +20,6 @@ public class PhysicsSim : MonoBehaviour
     void FixedUpdate()
     {
         gameObject.transform.position += velocity * Time.fixedDeltaTime;
-        gameObject.transform.Rotate(AngularVelocity);
+        gameObject.transform.Rotate(AngularVelocity * Time.fixedDeltaTime);
     }
 }

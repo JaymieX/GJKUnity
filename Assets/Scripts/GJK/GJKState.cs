@@ -60,7 +60,14 @@ public class Simplex
 
     public void Insert(Vector3 value, Vector3 vertex)
     {
-        _vertices.AddAfter(_vertices.Find(value), vertex);
+        if (PeekBack() == value)
+        {
+            Push(vertex);
+        }
+        else
+        {
+            _vertices.AddAfter(_vertices.Find(value), vertex);
+        }
     }
 }
 
