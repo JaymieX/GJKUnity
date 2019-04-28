@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class GJK
 {
-    private static Vector3 SupportFunction(Vector3 direction, Polytope polytopeA, Polytope polytopeB)
+    private static Vector3 SupportFunction(Vector3 direction, Polytope polytopeA, Polytope polytopeB, out Vector3 a, out Vector3 b)
     {
-        Vector3 tempPointA = polytopeA.GetFurthestPoint(direction);
-        Vector3 tempPointB = polytopeB.GetFurthestPoint(-direction);
-        return tempPointA + -tempPointB;
+        a = polytopeA.GetFurthestPoint(direction);
+        b = polytopeB.GetFurthestPoint(-direction);
+        return a + -b;
     }
 
     private static Edge FindClosestEdge(Vector3 origin, ref GJKState state)
@@ -60,7 +60,8 @@ public class GJK
                 state.LastDirection = Vector3.Cross(Vector3.Cross(directionBToA, directionBToO), directionBToA);
 
                 // Add third point
-                state.CurrentSimplex.Push(SupportFunction(state.LastDirection, state.GetPolytopeA, state.GetPolytopeB));
+                Vector3 ta, tb;
+                state.CurrentSimplex.Push(SupportFunction(state.LastDirection, state.GetPolytopeA, state.GetPolytopeB, out ta, out tb));
             }
             else // Second point is shit
             {
@@ -104,7 +105,8 @@ public class GJK
             state.LastDirection = newDirection.normalized;
 
             // Add 4th point
-            state.CurrentSimplex.Push(SupportFunction(state.LastDirection, state.GetPolytopeA, state.GetPolytopeB));
+            Vector3 ta, tb;
+            state.CurrentSimplex.Push(SupportFunction(state.LastDirection, state.GetPolytopeA, state.GetPolytopeB, out ta, out tb));
         }
         // Tetrahedron
         else
@@ -196,11 +198,12 @@ public class GJK
     private static EPAData EPA(ref GJKState state)
     {
         Vector3 origin = Vector3.zero - state.CurrentSimplex.PeekBack();
+        Vector3 ta, tb;
 
         while (true)
         {
             Edge e = FindClosestEdge(origin, ref state);
-            Vector3 supportP = SupportFunction(e.EdgeNormal, state.GetPolytopeA, state.GetPolytopeB);
+            Vector3 supportP = SupportFunction(e.EdgeNormal, state.GetPolytopeA, state.GetPolytopeB, out ta, out tb);
 
             float d = Vector3.Dot(supportP, e.EdgeNormal);
             if (d - e.Distance < 0.0001f)
@@ -208,6 +211,7 @@ public class GJK
                 EPAData data = new EPAData();
                 data.Normal = e.EdgeNormal;
                 data.Depth = d;
+                data.Contact = (ta + tb) / 2f;
 
                 return data;
             }
@@ -235,7 +239,8 @@ public class GJK
             if (state.CurrentSimplex.GetSize() == 0)
             {
                 // Add the initial point
-                state.CurrentSimplex.Push(SupportFunction(polytopeB.GetCentre() - polytopeA.GetCentre(), polytopeA, polytopeB));
+                Vector3 ta, tb;
+                state.CurrentSimplex.Push(SupportFunction(polytopeB.GetCentre() - polytopeA.GetCentre(), polytopeA, polytopeB, out ta, out tb));
 
                 // Get a search direction from first point to origin
                 if (state.LastDirection == Vector3.zero)
@@ -248,7 +253,8 @@ public class GJK
             else if (state.CurrentSimplex.GetSize() == 1)
             {
                 // Add next point
-                state.CurrentSimplex.Push(SupportFunction(state.LastDirection, polytopeA, polytopeB));
+                Vector3 ta, tb;
+                state.CurrentSimplex.Push(SupportFunction(state.LastDirection, polytopeA, polytopeB, out ta, out tb));
 
                 // Check if this point passes origin
                 if (state.CurrentSimplex.PeekBack().IsInOppositeDirection(state.LastDirection))

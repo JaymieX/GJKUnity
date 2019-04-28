@@ -62,7 +62,7 @@ public class SimulationManager : MonoBehaviour
                 Vector3 lpA = _state.CurrentSimplex.PopBack();
                 Vector3 lpB = _state.CurrentSimplex.PopBack();
 
-                Vector3 cpA = Vector3.Lerp(lpA, lpB, 0.5f);
+                Vector3 cpA = _state.epaData.Contact;
                 Vector3 cpB = cpA;
 
                 // Inert
@@ -106,9 +106,9 @@ public class SimulationManager : MonoBehaviour
                 compB.AngularVelocity.y -= wb.y;
                 compB.AngularVelocity.z -= wb.z;
 
-                compA.velocity += ((j / compA.mass) * _state.epaData.Normal);
+                compA.velocity = compA.velocity + ((j / compA.mass) * _state.epaData.Normal);
 
-                compB.velocity += ((j / compB.mass) * -_state.epaData.Normal);
+                compB.velocity = compA.velocity - ((j / compB.mass) * _state.epaData.Normal);
 
                 _state = null;
             }
